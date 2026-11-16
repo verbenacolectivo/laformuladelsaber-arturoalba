@@ -165,7 +165,11 @@
     }
 
     var respondidas = 0;
-    var payload = { _formulario: FORMULARIO };
+    var ciudad = "";
+    try { ciudad = (sessionStorage.getItem("ciudad") || "").trim(); } catch (e) {}
+    var farmacia = "";
+    try { farmacia = (sessionStorage.getItem("farmacia") || "").trim(); } catch (e) {}
+    var payload = { _formulario: FORMULARIO, ciudad: ciudad, farmacia: farmacia };
     for (var q = 1; q <= total; q++) {
         var texto = envio[q] || "Sin respuesta";
         if (texto !== "Sin respuesta") respondidas++;
