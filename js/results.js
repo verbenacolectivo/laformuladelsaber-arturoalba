@@ -157,7 +157,7 @@
        - No envía nada si no se ha contestado ninguna pregunta.
        - Envía una sola vez por intento (quiz.js reinicia la marca en la pregunta 1).
     ---------------------------------------------------------------- */
-    var ENDPOINT   = "https://script.google.com/macros/s/AKfycbzkvEHq9Htb0d1igYuVkayjRzHxdz8xZZZPuqu4XiFO5_4ChuIXKSVzr7o2RzGDjVCvDg/exec";
+    var ENDPOINT   = "https://script.google.com/macros/s/AKfycbyp_upOdCe6n5SR8_sAm1I_T52RXs-_KwqDn85JRuHs5D4BDA7YVXL_ZxJ6VQanwrPr5w/exec";
     var FORMULARIO = "La fórmula del saber";
 
     function yaEnviado() {
