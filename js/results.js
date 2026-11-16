@@ -60,6 +60,7 @@
     var blocks = document.querySelectorAll(".results__question-block");
     var total  = blocks.length;
     var score  = 0;
+    var envio  = {};   /* texto de la respuesta de cada pregunta, para la hoja de cálculo */
 
     blocks.forEach(function (block) {
         var question = block.dataset.question;
@@ -99,6 +100,14 @@
                 html += makeRow("is-wrong", "Tu combinación: " + userText);
             }
 
+            if (given === null) {
+                envio[question] = "Sin respuesta";
+            } else if (isCorrect) {
+                envio[question] = "\u2713 " + correctText.trim();
+            } else {
+                envio[question] = "\u2717 " + (userText || slugsToText(given)).trim();
+            }
+
             optionsList.innerHTML = html;
             return;
         }
@@ -108,6 +117,7 @@
         ---------------------------------------------------------------- */
         var options = block.querySelectorAll(".results__option");
         var isCorrectAnswer = false;
+        envio[question] = "Sin respuesta";
 
         options.forEach(function (opt) {
             var isCorrect   = opt.dataset.correct === "true";
@@ -116,6 +126,10 @@
             if (isCorrect)              { opt.classList.add("is-correct"); }
             if (wasSelected && !isCorrect) { opt.classList.add("is-wrong"); }
             if (wasSelected && isCorrect)  { isCorrectAnswer = true; }
+            if (wasSelected) {
+                var t = opt.querySelector(".results__option-text");
+                envio[question] = (isCorrect ? "\u2713 " : "\u2717 ") + (t ? t.textContent.trim() : given);
+            }
         });
 
         if (isCorrectAnswer) score++;
@@ -137,4 +151,38 @@
     if (totalEl)   totalEl.textContent   = total;
     if (titleEl)   titleEl.textContent   = msg.title;
     if (messageEl) messageEl.textContent = msg.text;
+
+    /* ----------------------------------------------------------------
+       ENVÍO A LA HOJA DE GOOGLE (pestaña "La fórmula del saber")
+       - No envía nada si no se ha contestado ninguna pregunta.
+       - Envía una sola vez por intento (quiz.js reinicia la marca en la pregunta 1).
+    ---------------------------------------------------------------- */
+    var ENDPOINT   = "https://script.google.com/macros/s/AKfycbzkvEHq9Htb0d1igYuVkayjRzHxdz8xZZZPuqu4XiFO5_4ChuIXKSVzr7o2RzGDjVCvDg/exec";
+    var FORMULARIO = "La fórmula del saber";
+
+    function yaEnviado() {
+        try { return !!sessionStorage.getItem("respuestas-enviadas"); } catch (e) { return false; }
+    }
+
+    var respondidas = 0;
+    var payload = { _formulario: FORMULARIO };
+    for (var q = 1; q <= total; q++) {
+        var texto = envio[q] || "Sin respuesta";
+        if (texto !== "Sin respuesta") respondidas++;
+        payload["Pregunta " + q] = texto;
+    }
+    payload["Aciertos"] = score + "/" + total;
+
+    if (respondidas > 0 && !yaEnviado()) {
+        try { sessionStorage.setItem("respuestas-enviadas", "1"); } catch (e) {}
+        try {
+            fetch(ENDPOINT, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload),
+                keepalive: true
+            });
+        } catch (e) {}
+    }
 })();
