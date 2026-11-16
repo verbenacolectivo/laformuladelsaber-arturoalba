@@ -213,14 +213,16 @@ body.landing {
         grid-row: 2;
     }
 
+    /* "DEL SABER" se corta contra el borde inferior igual que "LA FÓRMULA" contra el superior */
     .landing__text--bottom {
         grid-row: 3;
         align-self: end;
-        position: static;
+        position: absolute;
+        bottom: -0.29em;
+        padding-bottom: 0;
         animation: none;
         opacity: 1;
-        transform: none;
-        padding-bottom: 1.5rem;
+        transform: translateX(-50%);
     }
 
     .landing__brand {
